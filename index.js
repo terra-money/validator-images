@@ -1,8 +1,8 @@
 import fetch from 'node-fetch';
-import finished from 'stream';
+import stream from 'stream';
 import axios from 'axios';
 import { promisify } from 'util';
-import createWriteStream from 'fs';
+import fs from 'fs';
 
 main()
 
@@ -22,10 +22,11 @@ async function main() {
 
   // For each chain LCD...
   for (var i = 0; i < lcds.length; i++) {
-    var paginator='';
+    var paginator = '';
     var lcd = lcds[i];
-    console.log(`Processing validator identities from LCD: ${lcd}`);
     var page = 1;
+
+    console.log(`Processing validator identities from LCD: ${lcd}`);
 
     // Gather validator identities until reaching final page.
     do {
@@ -47,7 +48,7 @@ async function main() {
         return err;
       }
       
-      // Add identities to set to filter duplicates.
+      // Add identities to Set to filter duplicates.
       identitiesArray.forEach(identitiesSet.add, identitiesSet);
 
       // Move to next page of validators.
@@ -86,8 +87,8 @@ async function main() {
  * @param {string} filepath Filepath to save validator image.
  */
 async function downloadImage(imageURL, filepath) {
-  const finishedDownload = promisify(finished);
-  const writer = createWriteStream(filepath);
+  const finishedDownload = promisify(stream.finished);
+  const writer = fs.createWriteStream(filepath);
 
   const response = await axios({
     method: 'GET',
