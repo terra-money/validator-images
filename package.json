@@ -1,0 +1,9 @@
+{
+  "name": "validator-images",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Generates images for validators on all chains on Station.",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
+}
