@@ -4,7 +4,7 @@ import axios from 'axios';
 import { promisify } from 'util';
 import fs from 'fs';
 
-main()
+main();
 
 async function main() {
   var validatorData;
@@ -73,7 +73,7 @@ async function main() {
     if (linkResponse.filepath) {
       downloadImage(
         linkResponse.imageURL,
-        linkResponse.filepath
+        linkResponse.filepath,
       );
     }
     await new Promise(r => setTimeout(r, 1000));
@@ -94,7 +94,7 @@ async function downloadImage(imageURL, filepath) {
     method: 'GET',
     url: imageURL,
     responseType: 'stream',
-    followRedirect: false
+    followRedirect: false,
   });
 
   response.data.pipe(writer);
