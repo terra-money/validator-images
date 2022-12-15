@@ -20,3 +20,15 @@ jobs:
         node-version: 16
         cache: 'npm'
     - run: node index.js
+    
+    - name: setup git config
+    - run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+
+    - name: commit
+    - run: |
+        git add -A
+        git commit -m "automatic image update"
+        git push origin $GITHUB_REF
+
