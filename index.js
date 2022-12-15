@@ -65,19 +65,31 @@ async function main() {
     return el.trim() != '';
   });
 
+  // Create Semaphore for image download request queueing.
+  const throttler = new Semaphore(6);
+
   // For each identity value in array, get primary image url,
   // generate download filepath, and download image.
   console.log('\nInvalid identities will be logged below:');
-  for (var idx = 0; idx < identitiesArray.length; idx++) {
-    const linkResponse = await getLink(identitiesArray[idx]);
-    if (linkResponse.filepath) {
-      downloadImage(
-        linkResponse.imageURL,
-        linkResponse.filepath,
-      );
-    }
-    await new Promise(r => setTimeout(r, 1000));
+  identitiesArray.map((identity) => {
+    throttler.callFunction(downloadImage, identity);
+  })
+}
+
+/**
+ * Returns LCD endpoints for chains on Station.
+ *
+ * @return {string[]} lcds LCD endpoint values for chains on Station.
+ */
+async function getLCDs() {
+  const chainResponse = await fetch('https://assets.terra.money/station/chains.json');
+  const chainData = await chainResponse.json();
+
+  var lcds = new Array();
+  for (const [_, value] of Object.entries(chainData['mainnet'])) {
+    lcds.push(value['lcd']);
   }
+  return lcds;
 }
 
 /**
@@ -86,19 +98,23 @@ async function main() {
  * @param {string} imageURL URL to validator image.
  * @param {string} filepath Filepath to save validator image.
  */
-async function downloadImage(imageURL, filepath) {
-  const finishedDownload = promisify(stream.finished);
-  const writer = fs.createWriteStream(filepath);
+async function downloadImage(identity) {
+  const linkResponse = await getLink(identity);
 
-  const response = await axios({
-    method: 'GET',
-    url: imageURL,
-    responseType: 'stream',
-    followRedirect: false,
-  });
+  if (linkResponse.filepath) {
+    const finishedDownload = promisify(stream.finished);
+    const writer = fs.createWriteStream(linkResponse.filepath);
 
-  response.data.pipe(writer);
-  await finishedDownload(writer);
+    const response = await axios({
+      method: 'GET',
+      url: linkResponse.imageURL,
+      responseType: 'stream',
+      followRedirect: false,
+    });
+
+    response.data.pipe(writer);
+    await finishedDownload(writer);
+  }
 }
 
 /**
@@ -145,18 +161,50 @@ async function getLink(identity) {
   }
 }
 
-/**
- * Returns LCD endpoints for chains on Station.
- *
- * @return {string[]} lcds LCD endpoint values for chains on Station.
- */
-async function getLCDs() {
-  const chainResponse = await fetch('https://assets.terra.money/station/chains.json');
-  const chainData = await chainResponse.json();
-
-  var lcds = new Array();
-  for (const [_, value] of Object.entries(chainData['mainnet'])) {
-    lcds.push(value['lcd']);
+/* Semaphore class which handles image download request queueing. */
+export default class Semaphore {
+  /**
+   * Creates a semaphore that limits the number of concurrent Promises being handled
+   * @param {*} maxConcurrentRequests max number of concurrent promises being handled at any time
+   */
+  constructor(maxConcurrentRequests = 1) {
+    this.currentRequests = [];
+    this.runningRequests = 0;
+    this.maxConcurrentRequests = maxConcurrentRequests;
   }
-  return lcds;
+
+  /**
+   * Returns a Promise that will eventually return the result of the function passed in
+   * Use this to limit the number of concurrent function executions
+   * @param {*} fnToCall function that has a cap on the number of concurrent executions
+   * @param {...any} args any arguments to be passed to fnToCall
+   * @returns Promise that will resolve with the resolved value as if the function passed in was directly called
+   */
+  callFunction(fnToCall, ...args) {
+    return new Promise((resolve, reject) => {
+      this.currentRequests.push({
+        resolve,
+        reject,
+        fnToCall,
+        args,
+      });
+      this.tryNext();
+    });
+  }
+
+  tryNext() {
+    if (!this.currentRequests.length) {
+      return;
+    } else if (this.runningRequests < this.maxConcurrentRequests) {
+      let { resolve, reject, fnToCall, args } = this.currentRequests.shift();
+      this.runningRequests++;
+      let req = fnToCall(...args);
+      req.then((res) => resolve(res))
+        .catch((err) => reject(err))
+        .finally(() => {
+          this.runningRequests--;
+          this.tryNext();
+        });
+    }
+  }
 }
