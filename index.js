@@ -66,7 +66,7 @@ async function main() {
   });
 
   // Create Semaphore for image download request queueing.
-  const throttler = new Semaphore(3);
+  const throttler = new Semaphore(4);
 
   // For each identity value in array, get primary image url,
   // generate download filepath, and download image.

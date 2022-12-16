@@ -33,5 +33,5 @@ jobs:
     - name: commit
       run: |
         git add -A
-        git commit -m "automatic image update" || true
+        git commit -m "chore: automatic image update" || true
         git push origin $GITHUB_REF
