@@ -9,9 +9,8 @@ main();
 async function main() {
   var validatorData;
 
-  // Pagination vars
+  // Limit of validators per page.
   const limit = 100;
-  var offset = 0;
 
   // Identity storage vars.
   var identitiesArray = new Array();
@@ -32,11 +31,6 @@ async function main() {
     do {
       console.log(`\tPage ${page} processing...`);
 
-      // If LCD match, paginate using `offset`.
-      if (lcd == "https://osmosis.feather.network") {
-        paginator = `&pagination.offset=${offset}`;
-      }
-
       // Generate validator identities.
       const validatorURL = `${lcd}/cosmos/staking/v1beta1/validators?pagination.limit=${limit}${paginator}`;
       const validatorResponse = await fetch(validatorURL);
@@ -52,11 +46,8 @@ async function main() {
       identitiesArray.forEach(identitiesSet.add, identitiesSet);
 
       // Move to next page of validators.
+      paginator = `&pagination.key=${encodeURIComponent(validatorData['pagination']['next_key'])}`;
       page += 1;
-      offset += limit;
-      if (lcd != "https://osmosis.feather.network") {
-        paginator = `&pagination.key=${validatorData['pagination']['next_key']}`;
-      }
     } while (validatorData['pagination']['next_key']);
   }
 
@@ -86,9 +77,11 @@ async function getLCDs() {
   const chainData = await chainResponse.json();
 
   var lcds = new Array();
-  for (const [_, value] of Object.entries(chainData['mainnet'])) {
-    lcds.push(value['lcd']);
+
+  for (const networkData of Object.values(Object.assign({}, ...Object.values(chainData)))) {
+    lcds.push(networkData['lcd'])
   }
+
   return lcds;
 }
 
