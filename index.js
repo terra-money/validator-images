@@ -82,6 +82,9 @@ async function getLCDs() {
     lcds.push(networkData['lcd'])
   }
 
+  // Add Terra Classic mainnet LCD.
+  lcds.push('https://lcd.terra.dev/');
+
   return lcds;
 }
 
