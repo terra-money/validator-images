@@ -91,12 +91,13 @@ async function getLCDs() {
 /**
  * Downloads image from imageURL to filepath.
  *
- * @param {string} imageURL URL to validator image.
- * @param {string} filepath Filepath to save validator image.
+ * @param {string} identity Validator alphanumeric identity.
  */
 async function downloadImage(identity) {
+  // Extract imageURL and generate filepath using getLink.
   const linkResponse = await getLink(identity);
 
+  // Download image if valid imageURL available.
   if (linkResponse.filepath) {
     const finishedDownload = promisify(stream.finished);
     const writer = fs.createWriteStream(linkResponse.filepath);
@@ -117,8 +118,7 @@ async function downloadImage(identity) {
  * Returns imageURL and filepath to download validator image.
  *
  * @param {string} identity Validator alphanumeric identity.
- * @return {string} imageURL URL to validator image.
- * @return {string} filepath Filepath to save validator image.
+ * @return {object} Object containing URL to validator image and filepath to save validator image.
  */
 async function getLink(identity) {
   var fingerprint;
@@ -160,8 +160,9 @@ async function getLink(identity) {
 /* Semaphore class which handles image download request queueing. */
 export default class Semaphore {
   /**
-   * Creates a semaphore that limits the number of concurrent Promises being handled
-   * @param {*} maxConcurrentRequests max number of concurrent promises being handled at any time
+   * Creates a semaphore that limits the number of concurrent Promises being handled.
+   * 
+   * @param {*} maxConcurrentRequests Max number of concurrent promises being handled at any time.
    */
   constructor(maxConcurrentRequests = 1) {
     this.currentRequests = [];
@@ -170,11 +171,12 @@ export default class Semaphore {
   }
 
   /**
-   * Returns a Promise that will eventually return the result of the function passed in
-   * Use this to limit the number of concurrent function executions
-   * @param {*} fnToCall function that has a cap on the number of concurrent executions
-   * @param {...any} args any arguments to be passed to fnToCall
-   * @returns Promise that will resolve with the resolved value as if the function passed in was directly called
+   * Returns a Promise that will eventually return the result of the function passed in.
+   * Use this to limit the number of concurrent function executions.
+   * 
+   * @param {*} fnToCall Function that has a cap on the number of concurrent executions.
+   * @param {...any} args Any arguments to be passed to fnToCall.
+   * @returns Promise that will resolve with the resolved value as if the function passed in was directly called.
    */
   callFunction(fnToCall, ...args) {
     return new Promise((resolve, reject) => {
