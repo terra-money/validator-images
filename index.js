@@ -79,7 +79,7 @@ async function getLCDs() {
   var lcds = new Array();
 
   for (const networkData of Object.values(Object.assign({}, ...Object.values(chainData)))) {
-    lcds.push(networkData['lcd'])
+    networkData['chainID'] !== 'localterra' && lcds.push(networkData['lcd'])
   }
 
   // Add Terra Classic mainnet LCD.
