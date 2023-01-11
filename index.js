@@ -73,7 +73,7 @@ async function main() {
  * @return {string[]} lcds LCD endpoint values for chains on Station.
  */
 async function getLCDs() {
-  const chainResponse = await fetch('https://assets.terra.money/station/chains.json');
+  const chainResponse = await fetch('https://station-assets.terra.money/chains.json');
   const chainData = await chainResponse.json();
 
   var lcds = new Array();
@@ -83,8 +83,7 @@ async function getLCDs() {
   }
 
   // Add Terra Classic mainnet LCD.
-  lcds.push('https://lcd.terra.dev/');
-
+  //lcds.push('https://lcd.terra.dev/');
   return lcds;
 }
 
