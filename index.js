@@ -34,7 +34,11 @@ async function main() {
       // Generate validator identities.
       const validatorURL = `${lcd}/cosmos/staking/v1beta1/validators?pagination.limit=${limit}${paginator}`;
       const validatorResponse = await fetch(validatorURL);
-      validatorData = await validatorResponse.json();
+      try {
+        validatorData = await validatorResponse.json();
+      } catch (err) {
+        console.log(`\nERROR: ${validatorURL} returned an invalid JSON.\n`)
+      }
       const validatorObjects = validatorData['validators'];
       try {
         identitiesArray = validatorObjects.map(a => a.description.identity);
