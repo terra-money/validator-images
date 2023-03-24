@@ -7,6 +7,7 @@ import fs from 'fs';
 main();
 
 async function main() {
+  var validatorResponse;
   var validatorData;
 
   // Limit of validators per page.
@@ -33,7 +34,11 @@ async function main() {
 
       // Generate validator identities.
       const validatorURL = `${lcd}/cosmos/staking/v1beta1/validators?pagination.limit=${limit}${paginator}`;
-      const validatorResponse = await fetch(validatorURL);
+      try {
+        validatorResponse = await fetch(validatorURL);
+      } catch (err) {
+        console.log(`\nERROR: Unable to fetch ${validatorURL}.\n`)
+      }
       try {
         validatorData = await validatorResponse.json();
       } catch (err) {
@@ -86,8 +91,6 @@ async function getLCDs() {
     networkData['chainID'] !== 'localterra' && lcds.push(networkData['lcd'])
   }
 
-  // Add Terra Classic mainnet LCD.
-  //lcds.push('https://lcd.terra.dev/');
   return lcds;
 }
 
