@@ -48,7 +48,8 @@ async function main() {
       try {
         identitiesArray = validatorObjects.map(a => a.description.identity);
       } catch (err) {
-        return err;
+        console.log(`\nERROR: ${validatorURL} unable to map identities.\n`);
+        continue;
       }
       
       // Add identities to Set to filter duplicates.
@@ -76,6 +77,8 @@ async function main() {
   })
 }
 
+const skippedChainIds = ['localterra', 'neutron-1', 'pion-1'];
+
 /**
  * Returns LCD endpoints for chains on Station.
  *
@@ -88,7 +91,7 @@ async function getLCDs() {
   var lcds = new Array();
 
   for (const networkData of Object.values(Object.assign({}, ...Object.values(chainData)))) {
-    networkData['chainID'] !== 'localterra' && lcds.push(networkData['lcd'])
+    !skippedChainIds.includes(networkData['chainID']) && lcds.push(networkData['lcd'])
   }
 
   return lcds;
