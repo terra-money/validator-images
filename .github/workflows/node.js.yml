@@ -7,9 +7,9 @@ on:
 
   workflow_dispatch:
 
-  schedule:
-    # Runs at 00:00 UTC daily.
-    - cron: '0 0 * * *'
+  # schedule:
+  #   # Runs at 00:00 UTC daily.
+  #   - cron: '0 0 * * *'
 
 jobs:
   build:
