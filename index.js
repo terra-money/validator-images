@@ -133,22 +133,22 @@ async function getLink(identity) {
   var fingerprint;
   var imageURL;
 
-  // Use Keybase API to request identity data which contains fingerprint information.
-  const identityURL = `https://keybase.io/_/api/1.0/key/fetch.json?pgp_key_ids=${identity}`;
-  const identityResponse = await fetch(identityURL);
-  const identityData = await identityResponse.json();
   try {
+    // Use Keybase API to request identity data which contains fingerprint information.
+    const identityURL = `https://keybase.io/_/api/1.0/key/fetch.json?pgp_key_ids=${identity}`;
+    const identityResponse = await fetch(identityURL);
+    const identityData = await identityResponse.json();
     fingerprint = identityData['keys'][0]['fingerprint'];
   } catch {
     console.log(`\t${identity}`);
     return {'filepath': null};
   }
 
-  // Use Keybase API to request fingerprint data which contains primary image url.
-  const fingerprintURL = `https://keybase.io/_/api/1.0/user/lookup.json?key_fingerprint=${fingerprint}`;
-  const fingerprintResponse = await fetch(fingerprintURL);
-  const fingerprintData = await fingerprintResponse.json();
   try {
+      // Use Keybase API to request fingerprint data which contains primary image url.
+    const fingerprintURL = `https://keybase.io/_/api/1.0/user/lookup.json?key_fingerprint=${fingerprint}`;
+    const fingerprintResponse = await fetch(fingerprintURL);
+    const fingerprintData = await fingerprintResponse.json();
     imageURL = fingerprintData['them']['0']['pictures']['primary']['url'];
   } catch {
     try {
