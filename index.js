@@ -58,7 +58,7 @@ async function main() {
       // Move to next page of validators.
       paginator = `&pagination.key=${encodeURIComponent(validatorData['pagination']['next_key'])}`;
       page += 1;
-    } while (validatorData['pagination']['next_key']);
+    } while (validatorData['pagination']?.['next_key']);
   }
 
   // Turn set into array and remove empty elements.
